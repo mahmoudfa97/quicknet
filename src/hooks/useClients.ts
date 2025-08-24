@@ -171,7 +171,7 @@ export const useClients = () => {
 
       setPayments((prev) => [newPayment, ...prev])
 
-      await updateClient(clientId, { balance: client.balance + amount })
+      await updateClient(clientId, { balance: client.balance - amount })
 
       return newPayment
     } catch (error) {

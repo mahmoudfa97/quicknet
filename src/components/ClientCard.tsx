@@ -51,7 +51,7 @@ export const ClientCard = ({ client, onPayment }: ClientCardProps) => {
 
         <div className="text-right">
           <Badge variant={badgeVariant} className="mb-2">
-            Balance
+            {client.balance > 0 ? 'balance' : 'paid'}
           </Badge>
           <p className={`text-xl font-bold ${balanceColor}`}>
             ₪{client.balance.toFixed(2)}
@@ -63,6 +63,7 @@ export const ClientCard = ({ client, onPayment }: ClientCardProps) => {
         <Button
           variant="professional"
           size="sm"
+          disabled={client.balance <= 0}
           onClick={() => onPayment(client.id)}
           className="flex-1"
         >

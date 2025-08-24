@@ -38,6 +38,99 @@ const Payments = () => {
   useEffect(() => {
     filterPayments()
   }, [payments, searchTerm, dateRange, amountFilter])
+  
+  const handlePrint = (payment) => {
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    // Convert timestamp to Date safely
+    let dateObj;
+    if (payment?.timestamp) {
+      const clean = payment.timestamp.replace("+00a:00", "+00:00"); // fix format if needed
+      dateObj = new Date(clean);
+    }
+
+    const formattedDate = dateObj
+      ? dateObj.toLocaleDateString("en-GB")
+      : "";
+    const formattedTime = dateObj
+      ? dateObj.toLocaleTimeString("en-GB")
+      : "";
+
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Payment Receipt - ${payment?.receiptNumber || ""}</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; color: #333; }
+            .receipt { border: 2px solid #ddd; padding: 20px; background: white; border-radius: 8px; }
+            .header { text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+            .title { font-size: 24px; font-weight: bold; color: #2563eb; margin-bottom: 5px; }
+            .receipt-number { color: #666; font-size: 14px; }
+            .info-row { display: flex; justify-content: space-between; margin: 8px 0; padding: 4px 0; }
+            .label { font-weight: bold; color: #555; }
+            .amount { font-size: 20px; font-weight: bold; color: #16a34a; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div id="receipt-content">
+            <div class="receipt">
+              <div class="header">
+                <div class="title">QuickNet</div>
+                <div class="receipt-number">Receipt #${payment?.receipt_number || ""}</div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="info-row">
+                  <span class="label">Client Name:</span>
+                  <span>${payment?.client?.client_name || ""}</span>
+                </div>
+
+                <div class="info-row">
+                  <span class="label">Invoice Number:</span>
+                  <span>${payment?.client?.invoice_number || ""}</span>
+                </div>
+
+                <div class="info-row">
+                  <span class="label">Payment Date:</span>
+                  <span>${formattedDate}</span>
+                </div>
+
+                <div class="info-row">
+                  <span class="label">Payment Time:</span>
+                  <span>${formattedTime}</span>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="info-row">
+                  <span class="label">Payment Amount:</span>
+                  <span class="amount">₪${payment?.amount?.toFixed(2) || "0.00"}</span>
+                </div>
+
+              </div>
+
+              <div class="footer">
+                <p>Thank you for your payment!</p>
+                <p>Generated on ${new Date().toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
+  }
+};
+
 
   const fetchPayments = async () => {
     try {
@@ -51,19 +144,14 @@ const Payments = () => {
         `)
         .order("timestamp", { ascending: false })
 
-      if (!authState.user?.isAdmin) {
-        const { data: userClients } = await supabase.from("clients").select("id").eq("user_id", authState.user?.id)
-
-        const clientIds = userClients?.map((client) => client.id) || []
-        query = query.in("clientId", clientIds)
-      }
-
+     
       const { data, error } = await query
 
       if (error) {
         console.error("Error fetching payments:", error)
         return
       }
+      setLoading(false)
 
       setPayments(data || [])
     } catch (error) {
@@ -257,6 +345,7 @@ const Payments = () => {
                   <div
                     key={payment.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    onClick={() => handlePrint(payment)}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -269,7 +358,7 @@ const Payments = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">${payment.amount.toLocaleString()}</div>
+                      <div className="text-lg font-bold text-green-600">${payment.amount.toLocaleString()}</div>                    
                     </div>
                   </div>
                 ))}

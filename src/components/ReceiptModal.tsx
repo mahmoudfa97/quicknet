@@ -100,7 +100,7 @@ const handlePrint = () => {
 
   if (!payment || !client) return null;
 
-  const newBalance = client.balance + payment.amount;
+  const newBalance = client.balance - payment.amount;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
