@@ -65,9 +65,7 @@ const PatronLedgerApp = () => {
 
   const stats = getTotalStats();
 
-  if (!authState.isAuthenticated) {
-    return <AuthenticationFlow />;
-  }
+
 
   return (
     <Layout title="Client Management Dashboard">

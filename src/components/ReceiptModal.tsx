@@ -147,7 +147,7 @@ export const ReceiptModal = ({ payment, client, isOpen, onClose }: ReceiptModalP
               
               <div className="info-row">
                 <span className="label">New Balance:</span>
-                <span className="font-semibold text-success">₪{newBalance.toFixed(2)}</span>
+                <span className="font-semibold text-success">₪{Number(newBalance.toFixed(2))}</span>
               </div>
             </div>
 

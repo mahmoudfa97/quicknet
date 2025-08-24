@@ -11,7 +11,7 @@ interface PaymentModalProps {
   client: Client | null;
   isOpen: boolean;
   onClose: () => void;
-  onProcessPayment: (clientId: string, amount: number) => Payment | null;
+  onProcessPayment: (clientId: string, amount: number) => Promise<Payment>;
   onShowReceipt: (payment: Payment, client: Client) => void;
 }
 
@@ -51,7 +51,7 @@ export const PaymentModal = ({
         });
         
         // Show receipt
-        onShowReceipt(payment, client);
+        onShowReceipt(await payment, client);
         
         // Reset form and close
         setAmount('');
@@ -120,7 +120,6 @@ export const PaymentModal = ({
                 id="amount"
                 type="number"
                 step="0.01"
-                min="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter payment amount"
