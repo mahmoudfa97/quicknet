@@ -75,7 +75,7 @@ export const useAuthState = () => {
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: `${username}@quicknet.local`, // Convert username to email format
+        email: `${username}`, // Convert username to email format
         password,
       })
 
@@ -100,7 +100,7 @@ export const useAuthState = () => {
       }
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${username}@quicknet.local`, // Convert username to email format
+        email: `${username}`, // Convert username to email format
         password,
       })
 
@@ -114,6 +114,7 @@ export const useAuthState = () => {
       const { error: profileError } = await supabase.from("users").insert({
         id: authData.user.id,
         username,
+        password,
         is_admin: count === 0, // First user is admin
       })
 

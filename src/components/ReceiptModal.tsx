@@ -113,36 +113,36 @@ export const ReceiptModal = ({ payment, client, isOpen, onClose }: ReceiptModalP
             <div className="space-y-3">
               <div className="info-row">
                 <span className="label">Client Name:</span>
-                <span>{client.clientName}</span>
+                <span>{client?.clientName}</span>
               </div>
               
               <div className="info-row">
                 <span className="label">Invoice Number:</span>
-                <span>{client.invoiceNumber}</span>
+                <span>{client?.invoiceNumber}</span>
               </div>
               
-              {client.phone && (
+              {client?.phone && (
                 <div className="info-row">
                   <span className="label">Phone:</span>
-                  <span>{client.phone}</span>
+                  <span>{client?.phone}</span>
                 </div>
               )}
               
               <div className="info-row">
                 <span className="label">Payment Date:</span>
-                <span>{payment.timestamp.toLocaleDateString()}</span>
+                <span>{payment?.timestamp?.toLocaleDateString()}</span>
               </div>
               
               <div className="info-row">
                 <span className="label">Payment Time:</span>
-                <span>{payment.timestamp.toLocaleTimeString()}</span>
+                <span>{payment?.timestamp?.toLocaleTimeString()}</span>
               </div>
               
               <hr className="my-4" />
               
               <div className="info-row">
                 <span className="label">Payment Amount:</span>
-                <span className="amount">₪{payment.amount.toFixed(2)}</span>
+                <span className="amount">₪{payment?.amount?.toFixed(2)}</span>
               </div>
               
               <div className="info-row">
