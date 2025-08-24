@@ -12,82 +12,91 @@ interface ReceiptModalProps {
 }
 
 export const ReceiptModal = ({ payment, client, isOpen, onClose }: ReceiptModalProps) => {
-  const handlePrint = () => {
-    const receiptContent = document.getElementById('receipt-content');
-    if (receiptContent) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Payment Receipt - ${payment?.receiptNumber}</title>
-              <style>
-                body { 
-                  font-family: Arial, sans-serif; 
-                  max-width: 400px; 
-                  margin: 0 auto; 
-                  padding: 20px;
-                  color: #333;
-                }
-                .receipt { 
-                  border: 2px solid #ddd; 
-                  padding: 20px; 
-                  background: white;
-                  border-radius: 8px;
-                }
-                .header { 
-                  text-align: center; 
-                  border-bottom: 1px solid #eee; 
-                  padding-bottom: 15px; 
-                  margin-bottom: 15px;
-                }
-                .title { 
-                  font-size: 24px; 
-                  font-weight: bold; 
-                  color: #2563eb;
-                  margin-bottom: 5px;
-                }
-                .receipt-number { 
-                  color: #666; 
-                  font-size: 14px;
-                }
-                .info-row { 
-                  display: flex; 
-                  justify-content: space-between; 
-                  margin: 8px 0;
-                  padding: 4px 0;
-                }
-                .label { 
-                  font-weight: bold; 
-                  color: #555;
-                }
-                .amount { 
-                  font-size: 20px; 
-                  font-weight: bold; 
-                  color: #16a34a;
-                }
-                .footer { 
-                  text-align: center; 
-                  margin-top: 20px; 
-                  padding-top: 15px; 
-                  border-top: 1px solid #eee;
-                  font-size: 12px;
-                  color: #666;
-                }
-              </style>
-            </head>
-            <body>
-              ${receiptContent.innerHTML}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
+const handlePrint = () => {
+  const receiptContent = document.getElementById("receipt-content");
+  if (receiptContent) {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Payment Receipt - ${payment?.receiptNumber || ""}</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                max-width: 400px; 
+                margin: 0 auto; 
+                padding: 20px;
+                color: #333;
+              }
+              .receipt { 
+                border: 2px solid #ddd; 
+                padding: 20px; 
+                background: white;
+                border-radius: 8px;
+              }
+              .header { 
+                text-align: center; 
+                border-bottom: 1px solid #eee; 
+                padding-bottom: 15px; 
+                margin-bottom: 15px;
+              }
+              .title { 
+                font-size: 24px; 
+                font-weight: bold; 
+                color: #2563eb;
+                margin-bottom: 5px;
+              }
+              .receipt-number { 
+                color: #666; 
+                font-size: 14px;
+              }
+              .info-row { 
+                display: flex; 
+                justify-content: space-between; 
+                margin: 8px 0;
+                padding: 4px 0;
+              }
+              .label { 
+                font-weight: bold; 
+                color: #555;
+              }
+              .amount { 
+                font-size: 20px; 
+                font-weight: bold; 
+                color: #16a34a;
+              }
+              .footer { 
+                text-align: center; 
+                margin-top: 20px; 
+                padding-top: 15px; 
+                border-top: 1px solid #eee;
+                font-size: 12px;
+                color: #666;
+              }
+            </style>
+          </head>
+          <body>
+            ${receiptContent.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      // Wait until window content is loaded before printing
+      printWindow.onload = () => {
         printWindow.focus();
         printWindow.print();
-        printWindow.close();
-      }
+        // optional: close after printing
+        // printWindow.close();
+      };
     }
-  };
+  }
+};
+
 
   if (!payment || !client) return null;
 

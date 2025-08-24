@@ -23,7 +23,6 @@ export const useClients = () => {
         const { data: clientsData, error: clientsError } = await supabase
           .from("clients")
           .select("*")
-          .eq("user_id", user.id)
           .order("created_at", { ascending: false })
 
         if (clientsError) {
@@ -44,7 +43,6 @@ export const useClients = () => {
         const { data: paymentsData, error: paymentsError } = await supabase
           .from("payments")
           .select("*")
-          .eq("user_id", user.id)
           .order("timestamp", { ascending: false })
 
         if (paymentsError) {
