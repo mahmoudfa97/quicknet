@@ -5,16 +5,27 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Users, DollarSign, Activity, ArrowRight, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const Dashboard = () => {
   const { clients, payments, getTotalStats } = useClients();
-  const stats = getTotalStats();
+  const [stats, setState] = useState<{
+    totalClients: number;
+    totalBalance: number;
+    totalPayments: number;
+    recentPayments: number;
+  }>(getTotalStats());
 
   // Get recent payments (last 5)
   const recentPayments = payments
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 5);
 
+  useEffect(() => {
+    let stats = getTotalStats();
+    setState(stats);
+  }, []);
+  
   // Get clients with highest balances
   const topClients = clients
     .sort((a, b) => b.balance - a.balance)
@@ -79,7 +90,7 @@ const Dashboard = () => {
             )}
           </div>
           {recentPayments.length > 0 && (
-            <Link to="/clients">
+            <Link to="/payments">
               <Button variant="ghost" size="sm" className="w-full mt-3">
                 View All <ArrowRight className="w-4 h-4 ml-1" />
               </Button>

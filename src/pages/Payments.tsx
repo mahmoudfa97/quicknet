@@ -134,7 +134,6 @@ const Payments = () => {
 
   const fetchPayments = async () => {
     try {
-      setLoading(true)
 
       let query = supabase
         .from("payments")
@@ -151,7 +150,7 @@ const Payments = () => {
         console.error("Error fetching payments:", error)
         return
       }
-      setLoading(false)
+    
 
       setPayments(data || [])
     } catch (error) {
@@ -168,9 +167,9 @@ const Payments = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (payment) =>
-          payment.client.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          payment.client.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          payment.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase()),
+          payment.client.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          payment.client.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          payment.receiptNumber?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 

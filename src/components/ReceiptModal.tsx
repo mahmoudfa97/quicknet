@@ -104,7 +104,7 @@ const handlePrint = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-description='receipt-modal'>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Check className="w-5 h-5 text-success" />
