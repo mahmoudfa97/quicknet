@@ -56,34 +56,50 @@ A modern, full-featured client management and payment processing application bui
 ## Project Structure
 
 \`\`\`
-src/
-├── components/           # Reusable UI components
-│   ├── ui/              # shadcn/ui components
-│   ├── AuthProvider.tsx # Authentication context
-│   ├── ProtectedRoute.tsx # Route protection
-│   ├── Layout.tsx       # Main app layout
-│   ├── LoginForm.tsx    # Authentication form
-│   ├── ClientCard.tsx   # Client display component
-│   ├── AddClientForm.tsx # Client creation form
-│   ├── PaymentModal.tsx # Payment processing
-│   ├── ReceiptModal.tsx # Payment receipts
-│   ├── SearchBar.tsx    # Client search
-│   └── StatsCards.tsx   # Dashboard statistics
-├── pages/               # Application pages
-│   ├── Dashboard.tsx    # Main dashboard
-│   ├── Clients.tsx      # Client management
-│   ├── Payments.tsx     # Payment history (admin)
-│   └── Index.tsx        # App entry point
-├── hooks/               # Custom React hooks
-│   ├── useAuth.ts       # Authentication logic
-│   ├── useClients.ts    # Client management
-│   └── use-toast.ts     # Toast notifications
-├── lib/                 # Utility libraries
-│   ├── supabase.ts      # Supabase client config
-│   └── utils.ts         # Helper functions
-├── types/               # TypeScript type definitions
-│   └── index.ts         # Application types
-└── App.tsx              # Main application component
+quicknet/
+├── public/                    # Static assets
+│   └── robots.txt
+├── scripts/                   # Database setup scripts
+│   └── setup-rls-policies.sql
+├── src/
+│   ├── components/            # Reusable UI components
+│   │   ├── ui/               # shadcn/ui base components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   └── toast.tsx
+│   │   ├── AddClientForm.tsx  # Client creation form
+│   │   ├── AuthProvider.tsx   # Authentication context provider
+│   │   ├── ClientCard.tsx     # Individual client display
+│   │   ├── Layout.tsx         # Main application layout
+│   │   ├── LoginForm.tsx      # User authentication form
+│   │   ├── PaymentModal.tsx   # Payment processing interface
+│   │   ├── ProtectedRoute.tsx # Route access control
+│   │   ├── ReceiptModal.tsx   # Payment receipt display
+│   │   ├── SearchBar.tsx      # Client search functionality
+│   │   └── StatsCards.tsx     # Dashboard statistics cards
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useAuth.ts         # Authentication state management
+│   │   ├── useClients.ts      # Client data operations
+│   │   └── use-toast.ts       # Toast notification system
+│   ├── lib/                   # Utility libraries
+│   │   ├── supabase.ts        # Supabase client configuration
+│   │   └── utils.ts           # Helper functions
+│   ├── pages/                 # Application pages/routes
+│   │   ├── Clients.tsx        # Client management page
+│   │   ├── Dashboard.tsx      # Main dashboard page
+│   │   ├── Index.tsx          # Application entry point
+│   │   └── Payments.tsx       # Payment history (admin only)
+│   ├── types/                 # TypeScript definitions
+│   │   └── index.ts           # Application type definitions
+│   ├── App.tsx                # Root application component
+│   └── main.tsx               # Application entry point
+├── index.html                 # HTML template
+├── package.json               # Dependencies and scripts
+├── tailwind.config.ts         # Tailwind CSS configuration
+├── tsconfig.json              # TypeScript configuration
+└── vite.config.ts             # Vite build configuration
 \`\`\`
 
 ## Database Schema
@@ -138,7 +154,7 @@ src/
    npm run build
    \`\`\`
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 The following environment variables are automatically configured when using Supabase integration:
@@ -146,7 +162,7 @@ The following environment variables are automatically configured when using Supa
 - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
 
 
-## 👤 User Roles & Permissions
+## User Roles & Permissions
 
 ### Admin Users
 - ✅ View all clients across the system
