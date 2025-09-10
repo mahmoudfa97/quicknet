@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Users, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import ILSIcon from './ui/ils_icon_lucide_style';
 
 interface StatsCardsProps {
   stats: {
@@ -22,7 +23,7 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
     {
       title: 'Total Balance',
       value: `₪${stats.totalBalance.toFixed(2)}`,
-      icon: DollarSign,
+      icon: ILSIcon,
       color: 'text-success',
       bgColor: 'bg-success/10',
     },
