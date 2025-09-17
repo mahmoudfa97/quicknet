@@ -4,13 +4,19 @@ import { useState, useEffect, createContext, useContext } from "react"
 import type { AuthState } from "@/types"
 import { supabase } from "@/lib/supabase"
 
-const AuthContext = createContext<{
+export const AuthContext = createContext<{
   authState: AuthState
-  isLoading: boolean // Added loading state
+  isLoading: boolean
   login: (username: string, password: string) => Promise<boolean>
   register: (username: string, password: string) => Promise<boolean>
-  logout: () => void
-} | null>(null)
+  logout: () => Promise<void>
+}>({
+  authState: { isAuthenticated: false, user: null },
+  isLoading: true,
+  login: async () => false,
+  register: async () => false,
+  logout: async () => {},
+})
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -22,94 +28,135 @@ export const useAuth = () => {
 
 export const useAuthState = () => {
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
     isAuthenticated: false,
+    user: null,
   })
-  const [isLoading, setIsLoading] = useState(true) // Added loading state
+  const [isLoading, setIsLoading] = useState(true)
 
+  // ✅ Hydrate auth state from Supabase on mount
+  useEffect(() => {
+    const initAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("id, username, is_admin")
+          .eq("id", session.user.id)
+          .single()
+
+        if (userData) {
+          setAuthState({
+            isAuthenticated: true,
+            user: {
+              id: userData.id,
+              username: userData.username,
+              isAdmin: userData.is_admin,
+            },
+          })
+        }
+      }
+
+      setIsLoading(false)
+    }
+
+    initAuth()
+
+    // ✅ Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        supabase
+          .from("users")
+          .select("id, username, is_admin")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data: userData }) => {
+            if (userData) {
+              setAuthState({
+                isAuthenticated: true,
+                user: {
+                  id: userData.id,
+                  username: userData.username,
+                  isAdmin: userData.is_admin,
+                },
+              })
+            }
+          })
+      } else {
+        setAuthState({ isAuthenticated: false, user: null })
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    try {
-      if (authState.isAuthenticated) {
-        return true
-      }
-      const data = await supabase.auth.signInWithPassword({
-        email: `${username}`, // Convert username to email format
-        password,
-      })
-      if(data.error || !data.data.user) {
-        return false
-      }
-      if (data.data.user) {
-        const { data: userData, error: userError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", data.data.user.id)
-          .single()
-        if (userError || !userData) {
-          return false
-        }
-        setAuthState({
-          user: {
-            id: userData.id,
-            username: userData.username,
-            isAdmin: userData.is_admin,
-          },
-          isAuthenticated: true,
-        })
-        return true
-      }
-      return false     
-    } catch (error) {
-      return false
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: `${username}`, // 👈 fake email format
+      password,
+    })
+
+    if (error || !data.user) return false
+
+    const { data: userData } = await supabase
+      .from("users")
+      .select("id, username, is_admin")
+      .eq("id", data.user.id)
+      .single()
+
+    if (!userData) return false
+
+    setAuthState({
+      isAuthenticated: true,
+      user: {
+        id: userData.id,
+        username: userData.username,
+        isAdmin: userData.is_admin,
+      },
+    })
+    return true
   }
 
   const register = async (username: string, password: string): Promise<boolean> => {
-    try {
-      const { data: existingUser } = await supabase.from("users").select("username").eq("username", username).single()
+    // Check if username exists
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("username")
+      .eq("username", username)
+      .maybeSingle()
 
-      if (existingUser) {
-        return false // Username already exists
-      }
+    if (existingUser) return false
 
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${username}`, // Convert username to email format
-        password,
-      })
+    // Create auth account with fake email
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: `${username}`,
+      password,
+    })
 
-      if (authError || !authData.user) {
-        console.error("Registration error:", authError)
-        return false
-      }
+    if (authError || !authData.user) return false
 
-      const { count } = await supabase.from("users").select("*", { count: "exact", head: true })
+    // Count users to set first user as admin
+    const { count } = await supabase.from("users").select("*", { count: "exact", head: true })
 
-      const { error: profileError } = await supabase.from("users").insert({
-        id: authData.user.id,
-        username,
-        password,
-        is_admin: count === 0, // First user is admin
-      })
+    const { error: profileError } = await supabase.from("users").insert({
+      id: authData.user.id,
+      username,
+      is_admin: count === 0,
+    })
 
-      if (profileError) {
-        console.error("Profile creation error:", profileError)
-        return false
-      }
+    if (profileError) return false
 
-      return true
-    } catch (error) {
-      console.error("Registration error:", error)
-      return false
-    }
+    return true
   }
 
   const logout = async () => {
-    setAuthState({ user: null, isAuthenticated: false })
     await supabase.auth.signOut()
+    setAuthState({ user: null, isAuthenticated: false })
   }
 
-  return { authState, isLoading, login, register, logout } // Return loading state
+  return { authState, isLoading, login, register, logout }
 }
-
-export { AuthContext }
