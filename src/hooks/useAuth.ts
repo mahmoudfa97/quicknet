@@ -131,8 +131,8 @@ export const useAuthState = () => {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
     setAuthState({ user: null, isAuthenticated: false })
+    await supabase.auth.signOut()
   }
 
   return { authState, login, register, logout }
