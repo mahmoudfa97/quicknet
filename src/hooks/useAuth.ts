@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase"
 
 const AuthContext = createContext<{
   authState: AuthState
+  isLoading: boolean // Added loading state
   login: (username: string, password: string) => Promise<boolean>
   register: (username: string, password: string) => Promise<boolean>
   logout: () => void
@@ -24,69 +25,42 @@ export const useAuthState = () => {
     user: null,
     isAuthenticated: false,
   })
+  const [isLoading, setIsLoading] = useState(true) // Added loading state
 
-  useEffect(() => {
-    const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data: userData } = await supabase.from("users").select("*").eq("id", session.user.id).single()
-
-        if (userData) {
-          setAuthState({
-            user: {
-              id: userData.id,
-              username: userData.username,
-              isAdmin: userData.is_admin,
-            },
-            isAuthenticated: true,
-          })
-        }
-      }
-    }
-
-    getInitialSession()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const { data: userData } = await supabase.from("users").select("*").eq("id", session.user.id).single()
-
-        if (userData) {
-          setAuthState({
-            user: {
-              id: userData.id,
-              username: userData.username,
-              isAdmin: userData.is_admin,
-            },
-            isAuthenticated: true,
-          })
-        }
-      } else {
-        setAuthState({ user: null, isAuthenticated: false })
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      if (authState.isAuthenticated) {
+        return true
+      }
+      const data = await supabase.auth.signInWithPassword({
         email: `${username}`, // Convert username to email format
         password,
       })
-
-      if (error) {
-        console.error("Login error:", error)
+      if(data.error || !data.data.user) {
         return false
       }
-
-      return true
+      if (data.data.user) {
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", data.data.user.id)
+          .single()
+        if (userError || !userData) {
+          return false
+        }
+        setAuthState({
+          user: {
+            id: userData.id,
+            username: userData.username,
+            isAdmin: userData.is_admin,
+          },
+          isAuthenticated: true,
+        })
+        return true
+      }
+      return false     
     } catch (error) {
-      console.error("Login error:", error)
       return false
     }
   }
@@ -135,7 +109,7 @@ export const useAuthState = () => {
     await supabase.auth.signOut()
   }
 
-  return { authState, login, register, logout }
+  return { authState, isLoading, login, register, logout } // Return loading state
 }
 
 export { AuthContext }
