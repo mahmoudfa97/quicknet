@@ -23,18 +23,49 @@ const Clients = () => {
     client: Client
   } | null>(null)
 
-  // Update search results when clients change
+  // filters
+  const [filter, setFilter] = useState<{
+    paid?: boolean | null
+  }>({ paid: null })
+
+  // pagination
+  const [page, setPage] = useState(1)
+  const pageSize = 12
+
+  // Update search results when clients change or filters applied
   useEffect(() => {
-    setSearchResults(clients)
-  }, [clients])
+    let results = [...clients]
+
+    // Apply search filter
+    results = searchClients("")
+
+    // Apply paid/unpaid filter
+    if (filter.paid !== null) {
+      results = results.filter((c) => {
+        const hasPayments = c.payments && c.payments.length > 0
+        return filter.paid ? hasPayments : !hasPayments
+      })
+    }
+
+    setSearchResults(results)
+    setPage(1) // reset to first page whenever filters or clients change
+  }, [clients, filter])
 
   const handleSearch = (query: string) => {
-    const results = searchClients(query)
+    let results = searchClients(query)
+
+    if (filter.paid !== null) {
+      results = results.filter((c) => {
+        const hasPayments = c.payments && c.payments.length > 0
+        return filter.paid ? hasPayments : !hasPayments
+      })
+    }
+
     setSearchResults(results)
+    setPage(1)
   }
 
   const handleAddClient = (clientData: Omit<Client, "id" | "createdAt" | "updatedAt">) => {
-    // Check for duplicate invoice number
     const duplicate = clients.find((c) => c.invoiceNumber === clientData.invoiceNumber)
     if (duplicate) {
       throw new Error("Invoice number already exists")
@@ -42,8 +73,6 @@ const Clients = () => {
 
     addClient(clientData)
     setShowAddForm(false)
-    // Refresh search results
-    setSearchResults(clients)
   }
 
   const handleProcessPayment = (clientId: string, amount: number) => {
@@ -53,6 +82,10 @@ const Clients = () => {
   const handleShowReceipt = (payment: Payment, client: Client) => {
     setReceiptData({ payment, client })
   }
+
+  // pagination slicing
+  const totalPages = Math.ceil(searchResults.length / pageSize)
+  const paginatedResults = searchResults.slice((page - 1) * pageSize, page * pageSize)
 
   return (
     <Layout title="Client Management">
@@ -67,6 +100,28 @@ const Clients = () => {
         </Button>
       </div>
 
+      {/* Filters */}
+      <div className="flex gap-2 mb-6">
+        <Button
+          variant={filter.paid === null ? "professional" : "outline"}
+          onClick={() => setFilter({ paid: null })}
+        >
+          All
+        </Button>
+        <Button
+          variant={filter.paid === true ? "professional" : "outline"}
+          onClick={() => setFilter({ paid: true })}
+        >
+          Paid
+        </Button>
+        <Button
+          variant={filter.paid === false ? "professional" : "outline"}
+          onClick={() => setFilter({ paid: false })}
+        >
+          Unpaid
+        </Button>
+      </div>
+
       {/* Add Client Form */}
       {showAddForm && (
         <div className="mb-8">
@@ -75,7 +130,7 @@ const Clients = () => {
       )}
 
       {/* Clients Grid */}
-      {searchResults.length === 0 ? (
+      {paginatedResults.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <Filter className="w-8 h-8 text-muted-foreground" />
@@ -92,19 +147,34 @@ const Clients = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {searchResults.map((client, index) => (
-            <div key={client.id} style={{ animationDelay: `${index * 50}ms` }}>
-              <ClientCard
-                client={client}
-                onPayment={(clientId) => {
-                  const client = clients.find((c) => c.id === clientId)
-                  setPaymentClient(client || null)
-                }}
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedResults.map((client, index) => (
+              <div key={client.id} style={{ animationDelay: `${index * 50}ms` }}>
+                <ClientCard
+                  client={client}
+                  onPayment={(clientId) => {
+                    const client = clients.find((c) => c.id === clientId)
+                    setPaymentClient(client || null)
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination controls */}
+          <div className="flex justify-center mt-8 gap-2">
+            <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
+              Prev
+            </Button>
+            <span className="px-4 py-2 text-sm">
+              Page {page} of {totalPages}
+            </span>
+            <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+              Next
+            </Button>
+          </div>
+        </>
       )}
 
       {/* Payment Modal */}
