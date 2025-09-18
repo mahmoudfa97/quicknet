@@ -42,7 +42,7 @@ const Clients = () => {
     // Apply paid/unpaid filter
     if (filter.paid !== null) {
       results = results.filter((c) => {
-        const hasPayments = c.payments && c.payments.length > 0
+        const hasPayments = c.balance && c.balance > 0;
         return filter.paid ? hasPayments : !hasPayments
       })
     }
