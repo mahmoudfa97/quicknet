@@ -42,8 +42,8 @@ const Clients = () => {
     // Apply paid/unpaid filter
     if (filter.paid !== null) {
       results = results.filter((c) => {
-        const hasPayments = c.balance && c.balance > 0;
-        return filter.paid ? hasPayments : !hasPayments
+        const hasPayments = c.balance && c.balance >= 0;
+        return filter.paid ? !hasPayments : hasPayments;
       })
     }
 
@@ -56,8 +56,8 @@ const Clients = () => {
 
     if (filter.paid !== null) {
       results = results.filter((c) => {
-        const hasPayments = c.balance && c.balance > 0
-        return filter.paid ? hasPayments : !hasPayments
+        const hasPayments = c.balance && c.balance >= 0;
+        return filter.paid ? !hasPayments : hasPayments;
       })
     }
 
