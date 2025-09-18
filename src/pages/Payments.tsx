@@ -357,7 +357,7 @@ const Payments = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">{payment.amount.toLocaleString()}</div>                    
+                      <div className="text-lg font-bold text-green-600">₪{payment.amount.toLocaleString()}</div>                    
                     </div>
                   </div>
                 ))}
