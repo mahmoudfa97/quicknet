@@ -24,7 +24,7 @@ const Dashboard = () => {
   useEffect(() => {
     let stats = getTotalStats();
     setState(stats);
-  }, []);
+  }, [ clients, payments]);
   
   // Get clients with highest balances
   const topClients = clients
