@@ -253,7 +253,7 @@ const Payments = () => {
               <Receipt className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalAmount.toLocaleString()}</div>
+              <div className="text-2xl font-bold">₪{totalAmount.toLocaleString()}</div>
             </CardContent>
           </Card>
 
@@ -264,7 +264,7 @@ const Payments = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${filteredPayments.length > 0 ? (totalAmount / filteredPayments.length).toFixed(2) : "0"}
+                ₪{filteredPayments.length > 0 ? (totalAmount / filteredPayments.length).toFixed(2) : "0"}
               </div>
             </CardContent>
           </Card>
@@ -357,7 +357,7 @@ const Payments = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">${payment.amount.toLocaleString()}</div>                    
+                      <div className="text-lg font-bold text-green-600">₪{payment.amount.toLocaleString()}</div>                    
                     </div>
                   </div>
                 ))}

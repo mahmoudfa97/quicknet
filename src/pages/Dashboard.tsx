@@ -22,7 +22,7 @@ const Dashboard = () => {
     .slice(0, 5);
 
   useEffect(() => {
-    let stats = getTotalStats();
+    const stats = getTotalStats();
     setState(stats);
   }, [ clients, payments]);
   
@@ -168,3 +168,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
