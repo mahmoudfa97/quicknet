@@ -2,23 +2,31 @@ name: Supabase Keepalive
 
 on:
   schedule:
-    # Every 3 days at 09:00 UTC (adjust as you want)
-    - cron: "0 9 */3 * *"
+    # every day (UTC). Free tier pauses after ~1 week; daily is safe.
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 jobs:
-  ping:
+  keepalive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST
+      - name: Touch Supabase DB via RPC
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          set -euo pipefail
+
+          echo "Calling keepalive_touch()..."
           curl -sS -f \
-            "${SUPABASE_URL}/rest/v1/keepalive?select=id&limit=1" \
+            "${SUPABASE_URL}/rest/v1/rpc/keepalive_touch" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            -H "Accept: application/json" \
-            > /dev/null
-          echo "OK: pinged Supabase"
+            -H "Content-Type: application/json" \
+            --data '{}' \
+            -D /tmp/headers.txt \
+            -o /tmp/body.txt
+
+          echo "✅ RPC success"
+          echo "--- response headers ---"
+          cat /tmp/headers.txt
